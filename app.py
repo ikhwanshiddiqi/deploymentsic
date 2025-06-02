@@ -3,7 +3,6 @@ from tensorflow.keras.models import load_model
 import pickle
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import io
 import base64
@@ -38,7 +37,6 @@ def index():
             for day in range(1, days_ahead+1):
                 next_pred_scaled = model.predict(input_seq_scaled, verbose=0)[0][0]
                 preds.append(next_pred_scaled)
-                # Update window: hapus nilai pertama, tambahkan prediksi
                 input_seq_scaled = np.append(input_seq_scaled[0,1:,0], next_pred_scaled).reshape(1,30,1)
             
             preds_inv = scaler.inverse_transform(np.array(preds).reshape(-1,1)).flatten()
@@ -46,7 +44,6 @@ def index():
 
             historical_data = df['Close'].tail(500).values
 
-            # Buat plot
             fig, ax = plt.subplots()
 
             x_historical = list(range(len(historical_data)))
