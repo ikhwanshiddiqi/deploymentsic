@@ -77,6 +77,8 @@ Pastikan Anda telah menginstal:
     copras_spk_perekrutan/
     ├── app.py
     ├── copras_logic.py
+    ├── data/
+    │   └── ...csv
     ├── templates/
     │   └── index.html
     └── uploads/
