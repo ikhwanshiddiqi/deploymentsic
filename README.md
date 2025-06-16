@@ -75,3 +75,10 @@ Pastikan Anda telah menginstal:
     └── uploads/
     ```
     Folder `uploads/` akan dibuat secara otomatis saat aplikasi berjalan jika belum ada.
+
+# Kriteria dan Bobot
+1. Pengalaman        = 0.3
+2. Pendidikan        = 0.2
+3. Usia              = 0.2
+4. Status Perkawinan = 0.15
+5. Alamat            = 0.15
