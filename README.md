@@ -94,4 +94,5 @@ Pastikan Anda telah menginstal:
 5. Alamat = 0.15
 
 Benefit = Pengalaman, Pendidikan, dan Usia
+
 Cost = Status Perkawinan dan Alamat
