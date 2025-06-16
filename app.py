@@ -1,82 +1,89 @@
-from flask import Flask, render_template, request
-from tensorflow.keras.models import load_model
-import pickle
-import numpy as np
+import os
+from flask import Flask, request, render_template, redirect, url_for
+from werkzeug.utils import secure_filename
 import pandas as pd
-import matplotlib.pyplot as plt
-import io
-import base64
+import numpy as np
+from copras_logic import calculate_copras 
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+CRITERIA_WEIGHTS = {
+    'Pengalaman': 0.3,
+    'Pendidikan': 0.2,
+    'Usia': 0.2,
+    'Status Perkawinan': 0.15,
+    'Alamat': 0.15
+}
+
+if not (0.99 <= sum(CRITERIA_WEIGHTS.values()) <= 1.01):
+    raise ValueError("Total bobot kriteria harus mendekati 1.0. Saat ini: " + str(sum(CRITERIA_WEIGHTS.values())))
+
+BENEFIT_CRITERIA = [
+    'Pengalaman',
+    'Pendidikan',
+    'Usia'
+]
+
+COST_CRITERIA = [
+    'Status Perkawinan',
+    'Alamat'
+]
+
+@app.route('/')
 def index():
-    prediction = None
-    error_message = None
-    if request.method == 'POST':
+    return render_template('index.html')
+
+@app.route('/uploads', methods=['POST'])
+def upload_file():
+    if 'csv_file' not in request.files:
+        return render_template('index.html', error='Tidak ada bagian file dalam permintaan.')
+    
+    file = request.files['csv_file']
+    
+    if file.filename == '':
+        return render_template('index.html', error='Tidak ada file yang dipilih.')
+    
+    if file and file.filename.endswith('.csv'):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
         try:
-            dataset = request.form['dataset']
-            model_name = request.form['model']
-            days_ahead = int(request.form['days_ahead'])
+            # Baca file CSV
+            df_alternatives = pd.read_csv(filepath)
 
-            data_file = f"dataset/{dataset}.csv"
-            df = pd.read_csv(data_file)
-            
-            if 'Close' not in df.columns:
-                raise ValueError("File dataset tidak memiliki kolom 'Close'")
-            
-            last_30_prices = df['Close'].tail(30).values
-            if len(last_30_prices) < 30:
-                raise ValueError("Dataset tidak cukup untuk 30 data harga terakhir.")
-            
-            scaler = pickle.load(open(f'scaler/scaler_{dataset}.pkl', 'rb'))
-            model = load_model(f'model/model_{model_name}_{dataset}.keras')
-            
-            input_seq_scaled = scaler.transform(last_30_prices.reshape(-1, 1)).reshape(1,30,1)
-            preds = []
-            for day in range(1, days_ahead+1):
-                next_pred_scaled = model.predict(input_seq_scaled, verbose=0)[0][0]
-                preds.append(next_pred_scaled)
-                input_seq_scaled = np.append(input_seq_scaled[0,1:,0], next_pred_scaled).reshape(1,30,1)
-            
-            preds_inv = scaler.inverse_transform(np.array(preds).reshape(-1,1)).flatten()
-            prediction = [(day, round(pred, 5)) for day, pred in zip(range(1, days_ahead+1), preds_inv)]
+            if df_alternatives.columns[0] != 'Alternatif':
+                return render_template('index.html', error='Kolom pertama CSV harus bernama "Alternatif".')
 
-            historical_data = df['Close'].tail(500).values
+            missing_criteria = [c for c in CRITERIA_WEIGHTS.keys() if c not in df_alternatives.columns]
+            if missing_criteria:
+                return render_template('index.html', error=f"Kriteria berikut tidak ditemukan di CSV: {', '.join(missing_criteria)}. Harap sesuaikan file CSV atau konfigurasi bobot.")
 
-            fig, ax = plt.subplots()
+            ordered_columns = ['Alternatif'] + list(CRITERIA_WEIGHTS.keys())
+            df_alternatives = df_alternatives[ordered_columns]
 
-            x_historical = list(range(len(historical_data)))
-            ax.plot(x_historical, historical_data, label='Historis 500 Data Terakhir', color='blue')
+            df_ranked, df_results = calculate_copras(df_alternatives, CRITERIA_WEIGHTS, BENEFIT_CRITERIA, COST_CRITERIA)
 
-            pred_start = len(historical_data)
-            x_pred = list(range(pred_start, pred_start + days_ahead))
-            pred_values = [pred for day, pred in prediction]
-            ax.plot(x_pred, pred_values, linestyle='--', color='red', label='Prediksi')
+            ranked_html = df_ranked.to_html(classes='table table-striped text-center', index=False)
+            results_html = df_results.to_html(classes='table table-striped text-center', index=False)
 
-            ax.set_title(f'Prediksi Harga dengan 500 Data Historis Terakhir')
-            ax.set_xlabel('Index Data (urutan waktu)')
-            ax.set_ylabel('Harga')
-            ax.legend()
-            ax.grid(True)
+            os.remove(filepath)
 
-            buf = io.BytesIO()
-            plt.savefig(buf, format='png')
-            buf.seek(0)
-            plot_data = base64.b64encode(buf.getvalue()).decode('utf8')
-            buf.close()
-
-            return render_template('index.html', prediction=prediction, 
-                       error_message=error_message, 
-                       plot_data=plot_data,
-                       dataset=dataset,
-                       model_name=model_name,
-                       days_ahead=days_ahead
-                       )
+            return render_template('index.html', ranked_html=ranked_html, results_html=results_html)
 
         except Exception as e:
-            error_message = str(e)
-    return render_template('index.html', prediction=prediction, error_message=error_message)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            return render_template('index.html', error=f'Terjadi kesalahan saat memproses file: {e}')
+    else:
+        return render_template('index.html', error='File yang diunggah bukan CSV.')
 
 if __name__ == '__main__':
     app.run(debug=True)
