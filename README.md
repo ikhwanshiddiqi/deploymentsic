@@ -1,3 +1,7 @@
+# Nama Kelompok
+- Ikhwan Ash-Shiddiqi
+- Irma Fitriani
+
 # Sistem Pendukung Keputusan Perekrutan Teknisi - Metode COPRAS
 
 ![Sistem Pendukung Keputusan](https://img.shields.io/badge/Metode-COPRAS-blue)
@@ -71,41 +75,3 @@ Pastikan Anda telah menginstal:
     └── uploads/
     ```
     Folder `uploads/` akan dibuat secara otomatis saat aplikasi berjalan jika belum ada.
-
-## Penggunaan
-
-### 1. Konfigurasi Kriteria di `app.py`
-
-Buka file `app.py` dan sesuaikan bagian `CRITERIA_WEIGHTS`, `BENEFIT_CRITERIA`, dan `COST_CRITERIA` sesuai dengan kriteria perekrutan teknisi yang Anda inginkan.
-
-**Contoh Konfigurasi:**
-
-```python
-# app.py
-# ...
-# --- Konfigurasi Kriteria dan Bobot ---
-CRITERIA_WEIGHTS = {
-    'Pengalaman': 0.25,      # Kriteria: Pengalaman (tahun)
-    'Pendidikan': 0.20,      # Kriteria: Tingkat Pendidikan (skala)
-    'Usia': 0.15,            # Kriteria: Usia (misal: nilai semakin tinggi semakin ideal/sesuai range)
-    'Status Perkawinan': 0.20, # Kriteria: Status Perkawinan (misal: nilai 0-1)
-    'Alamat': 0.20,          # Kriteria: Kedekatan Alamat (misal: nilai semakin kecil semakin baik)
-}
-
-# Pastikan total bobot adalah 1.0 (atau mendekati 1.0)
-if not (0.99 <= sum(CRITERIA_WEIGHTS.values()) <= 1.01):
-    raise ValueError("Total bobot kriteria harus mendekati 1.0. Saat ini: " + str(sum(CRITERIA_WEIGHTS.values())))
-
-# Definisikan kriteria benefit (semakin tinggi semakin baik)
-BENEFIT_CRITERIA = [
-    'Pengalaman',
-    'Pendidikan',
-    'Usia'
-]
-
-# Definisikan kriteria cost (semakin rendah semakin baik)
-COST_CRITERIA = [
-    'Status Perkawinan', # Asumsi: Status Perkawinan yang tidak 'ideal' diberi nilai tinggi, jadi cost.
-    'Alamat'             # Asumsi: Jarak/Alamat yang jauh diberi nilai tinggi, jadi cost.
-]
-# ...
