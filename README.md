@@ -1,13 +1,13 @@
-# Nama Kelompok
-- Ikhwan Ash-Shiddiqi
-- Irma Fitriani
-
 # Sistem Pendukung Keputusan Perekrutan Teknisi - Metode COPRAS
 
 ![Sistem Pendukung Keputusan](https://img.shields.io/badge/Metode-COPRAS-blue)
 ![Bahasa Pemrograman](https://img.shields.io/badge/Python-3.x-blueviolet)
 ![Framework Web](https://img.shields.io/badge/Flask-Web-green)
 ![Frontend](https://img.shields.io/badge/Frontend-HTML%2FCSS%2FBootstrap-orange)
+
+# Nama Kelompok
+- Ikhwan Ash-Shiddiqi
+- Irma Fitriani
 
 ## Deskripsi Proyek
 
