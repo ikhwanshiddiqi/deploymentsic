@@ -93,6 +93,5 @@ Pastikan Anda telah menginstal:
 4. Status Perkawinan = 0.15
 5. Alamat = 0.15
 
-Benefit = Pengalaman, Pendidikan, dan Usia
-
-Cost = Status Perkawinan dan Alamat
+- Benefit = Pengalaman, Pendidikan, dan Usia
+- Cost = Status Perkawinan dan Alamat
