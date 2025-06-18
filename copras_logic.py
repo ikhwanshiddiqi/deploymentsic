@@ -56,5 +56,6 @@ def calculate_copras(df_alternatives, weights, benefit_criteria, cost_criteria):
 
     df_ranked = df_results.sort_values(by='Ni (%)', ascending=False).reset_index(drop=True)
     df_ranked['Ranking'] = df_ranked.index + 1
+    df_ranked = df_ranked[['Alternatif', 'Ranking']]
 
     return df_ranked, df_results
