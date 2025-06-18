@@ -1,0 +1,12 @@
+# Exported from Render on 2025-06-18T16:19:49Z
+services:
+  - type: web
+    name: deploymentsic
+    runtime: python
+    repo: https://github.com/ikhwanshiddiqi/deploymentsic
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    autoDeployTrigger: commit
+version: "1"
