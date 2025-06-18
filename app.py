@@ -71,12 +71,13 @@ def upload_file():
 
             df_ranked, df_results = calculate_copras(df_alternatives, CRITERIA_WEIGHTS, BENEFIT_CRITERIA, COST_CRITERIA)
 
+            csv_html = df_alternatives.to_html(classes='table table-striped text-center', index=False)
             ranked_html = df_ranked.to_html(classes='table table-striped text-center', index=False)
             results_html = df_results.to_html(classes='table table-striped text-center', index=False)
 
             os.remove(filepath)
 
-            return render_template('index.html', ranked_html=ranked_html, results_html=results_html)
+            return render_template('index.html', csv_html=csv_html, ranked_html=ranked_html, results_html=results_html)
 
         except Exception as e:
             if os.path.exists(filepath):

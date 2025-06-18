@@ -89,6 +89,17 @@
                     </button>
                 </form>
 
+                {% if csv_html %}
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-secondary fw-bold text-center text-white">
+                        <i class="bi bi-file-earmark-text-fill me-1"></i>Data CSV yang diunggah
+                    </div>
+                    <div class="card-body table-responsive">
+                        {{ csv_html | safe }}
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if ranked_html %}
                 <div class="row mt-5">
                     <div class="col-lg-6 mb-4">
